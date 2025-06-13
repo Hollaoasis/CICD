@@ -100,7 +100,7 @@ spec:
    * Deploy it to your Minikube cluster
 4. Use `kubectl get pods` or open the app via NodePort to verify
 
-## 🔍 Useful Commands
+## Useful Commands
 
 ```bash
 # Start minikube
