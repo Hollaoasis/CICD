@@ -3,3 +3,4 @@
 # fix cert paths
 # kubeconfig avec certs inline
 # kubeconfig: final fix
+# cert fixed in cluster
