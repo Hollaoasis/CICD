@@ -25,7 +25,8 @@ ci-cd-project/
 ├── Dockerfile              # Container build file
 ├── requirements.txt        # Python dependencies
 ├── kubernetes/
-│   └── deployment.yaml     # Kubernetes manifest
+│   ├── deployment.yaml     # Kubernetes deployment manifest
+│   └── service.yaml        # Kubernetes service manifest
 └── .github/
     └── workflows/
         └── deploy.yml      # GitHub Actions CI/CD pipeline
@@ -47,7 +48,7 @@ ci-cd-project/
 4. **Push Docker image to DockerHub**
 5. **Deploy to Kubernetes using kubectl**
 
-## Secrets Required
+## 🛠️ Secrets Required
 
 Set in the GitHub repository under `Settings > Secrets and variables > Actions`:
 
@@ -65,7 +66,9 @@ COPY . .
 CMD ["python", "app.py"]
 ```
 
-## Kubernetes Manifest (deployment.yaml)
+## Kubernetes Manifests
+
+### `deployment.yaml`
 
 ```yaml
 apiVersion: apps/v1
@@ -83,10 +86,27 @@ spec:
         app: flask-app
     spec:
       containers:
-        - name: flask-container
-          image: hollaoasis/your-image-name:latest
+        - name: flask-app
+          image: hollaoasis/flask-app:latest
           ports:
             - containerPort: 5000
+```
+
+### `service.yaml`
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-app
+spec:
+  type: NodePort
+  selector:
+    app: flask-app
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
 ```
 
 ## Test & Deploy a New Version
@@ -98,7 +118,25 @@ spec:
    * Run linter/tests
    * Build & push the Docker image
    * Deploy it to your Minikube cluster
-4. Use `kubectl get pods` or open the app via NodePort to verify
+4. Use `kubectl get pods` or open the app via tunnel to verify
+
+### WSL2 Access Fix (port-forward method)
+
+If you use WSL2 and cannot access `http://192.168.49.2:PORT` in your browser:
+
+Run this command inside WSL:
+
+```bash
+kubectl port-forward deployment/flask-app 5000:5000
+```
+
+Then open your browser on:
+
+```
+http://localhost:5000
+```
+
+This will allow you to access the app even without Minikube’s external IP.
 
 ## Useful Commands
 
@@ -115,6 +153,9 @@ kubectl get pods
 # Access service (NodePort)
 kubectl get svc
 minikube service flask-app
+
+# Port-forward to localhost (WSL2 fix)
+kubectl port-forward deployment/flask-app 5000:5000
 ```
 
 ## Diagram of CI/CD Pipeline
